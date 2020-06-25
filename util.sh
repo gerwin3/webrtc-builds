@@ -236,7 +236,7 @@ function checkout() {
 #
 # $1: The platform type.
 # $2: The output directory.
-function patch() {
+function do_patch() {
   local platform="$1"
   local outdir="$2"
 
@@ -256,6 +256,11 @@ function patch() {
     #   sed -i.bak 's|"//build/config/compiler:no_rtti",|#"//build/config/compiler:no_rtti",|' \
     #     build/config/BUILDCONFIG.gn
     # fi
+
+    # This patches the dependency on librt on macOS, it is not present on the default toolchain
+    # but should be replaced by a symlink to libSys which is provided by libclang_rt.osx
+    patch -p1 < ../../patches/patch_macos_linker_driver.patch
+
   popd >/dev/null
 }
 
@@ -381,6 +386,11 @@ function combine::static() {
     win)
       # TODO: Support VS 2017
       "$VS140COMNTOOLS../../VC/bin/lib" /OUT:$libname.lib @$libname.list
+      ;;
+    mac)
+      # Use libtool since ar does not support RMI scripts on macOS
+      libs=$(while read a; do echo -n "${a} "; done <$libname.list)
+      libtool -static -o $libname.a $libs
       ;;
     *)
       # Combine *.a static libraries

@@ -1,0 +1,14 @@
+diff --git a/build/toolchain/mac/linker_driver.py b/build/toolchain/mac/linker_driver.py
+index fd9e8d5..7eb4364 100644
+--- /build/toolchain/mac/linker_driver.py
++++ /build/toolchain/mac/linker_driver.py
+@@ -83,7 +83,11 @@ def Main(args):
+     elif arg == DETERMINISTIC_FLAG:
+       deterministic = True
+     else:
+-      compiler_driver_args.append(arg)
++      #compiler_driver_args.append(arg)
++      if '-lrt' in arg:
++        compiler_driver_args.append('-lclang_rt.osx')
++      else:
++        compiler_driver_args.append(arg)

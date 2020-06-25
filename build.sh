@@ -79,6 +79,20 @@ detect-platform
 TARGET_OS=${TARGET_OS:-$PLATFORM}
 TARGET_CPU=${TARGET_CPU:-x64}
 
+case $PLATFORM in
+  mac)
+    # Warn user about manually creating some necessary symlinks
+    echo " "
+    echo "There are some build issues in the webrtc toolchain at the moment that prevent succesful linkage. Please symlink the following static libs:"
+    echo " "
+    echo "  > sudo ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdkusr/lib/libclang_rt.osx.a"
+    echo "  > sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdkusr/lib/libgcc_s.1.tbd /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdkusr/lib/libgcc_s.tbd"
+    echo " "
+    echo "Not doing this might or might not cause the build to break."
+    echo " "
+    ;;
+esac
+
 echo "Host OS: $PLATFORM"
 echo "Target OS: $TARGET_OS"
 echo "Target CPU: $TARGET_CPU"
@@ -110,7 +124,7 @@ if [ $BUILD_ONLY = 0 ]; then
   check::webrtc::deps $PLATFORM $OUTDIR "$TARGET_OS"
 
   echo Patching WebRTC source
-  patch $PLATFORM $OUTDIR $ENABLE_RTTI
+  do_patch $PLATFORM $OUTDIR $ENABLE_RTTI
 fi
 
 echo Compiling WebRTC
